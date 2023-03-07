@@ -1,9 +1,9 @@
 package fake.st.emails.controller
 
 import fake.st.emails.WebIntegrationTest
-import fake.st.emails.entity.EmailDetails
-import fake.st.emails.entity.EmailDetailsWithAttachment
-import fake.st.emails.service.EmailService
+import fake.st.emails.entity.request.EmailDetails
+import fake.st.emails.entity.request.EmailDetailsWithAttachment
+import fake.st.emails.service.SendEmailService
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import org.hamcrest.Matchers
@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 class EmailControllerTest : WebIntegrationTest() {
 
     @Autowired
-    lateinit var emailService : EmailService
+    lateinit var sendEmailService : SendEmailService
 
     @Test
     @Throws(Exception::class)
@@ -57,8 +57,8 @@ class EmailControllerTest : WebIntegrationTest() {
     @Test
     @Throws(Exception::class)
     fun `sending simple email - with mail settings error - should return 500 response`() {
-        val email = ReflectionTestUtils.getField(emailService, "sender")
-        ReflectionTestUtils.setField(emailService, "sender", "invalid")
+        val email = ReflectionTestUtils.getField(sendEmailService, "sender")
+        ReflectionTestUtils.setField(sendEmailService, "sender", "invalid")
 
         mvc!!.perform(
             MockMvcRequestBuilders
@@ -77,7 +77,7 @@ class EmailControllerTest : WebIntegrationTest() {
         )
             .andExpect(MockMvcResultMatchers.status().isInternalServerError)
 
-        ReflectionTestUtils.setField(emailService, "sender", email)
+        ReflectionTestUtils.setField(sendEmailService, "sender", email)
     }
 
     @Test
@@ -119,8 +119,8 @@ class EmailControllerTest : WebIntegrationTest() {
     @Test
     @Throws(Exception::class)
     fun `sending mail with attachment - with mail settings error - should return 500 response`() {
-        val email = ReflectionTestUtils.getField(emailService, "sender")
-        ReflectionTestUtils.setField(emailService, "sender", "invalid")
+        val email = ReflectionTestUtils.getField(sendEmailService, "sender")
+        ReflectionTestUtils.setField(sendEmailService, "sender", "invalid")
         
         mvc!!.perform(
             MockMvcRequestBuilders
@@ -140,6 +140,6 @@ class EmailControllerTest : WebIntegrationTest() {
         )
             .andExpect(MockMvcResultMatchers.status().isInternalServerError)
 
-        ReflectionTestUtils.setField(emailService, "sender", email)
+        ReflectionTestUtils.setField(sendEmailService, "sender", email)
     }
 }

@@ -1,4 +1,4 @@
-package fake.st.emails.entity
+package fake.st.emails.entity.request
 
 import kotlinx.serialization.Serializable
 

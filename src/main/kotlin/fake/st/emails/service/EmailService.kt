@@ -1,17 +1,26 @@
 package fake.st.emails.service
 
 
-import org.springframework.validation.annotation.Validated;
-import fake.st.emails.entity.EmailDetails;
-import fake.st.emails.entity.EmailDetailsWithAttachment
-import fake.st.emails.entity.response.Response
+import fake.st.emails.entity.redis.Email
+import fake.st.emails.entity.redis.Priority
+import org.springframework.validation.annotation.Validated
 
-
+/**
+ * Service for email CRUD operations
+ *
+ * @author Robert Mayore.
+ * @version 1.0
+ * @since 26-02-2023.
+ */
 @Validated
 interface EmailService {
 
-    fun sendSimpleMail(details: EmailDetails) : Response
- 
-    fun sendMailWithAttachment(details : EmailDetailsWithAttachment) : Response
+    fun save(email: Email): Boolean
+
+    fun retrievePending(priority: Priority): MutableList<Email>
+
+    fun prepareForSending(emails: MutableList<Email>): MutableList<Email>
+
+    fun send(email: Email): Boolean
 
 }

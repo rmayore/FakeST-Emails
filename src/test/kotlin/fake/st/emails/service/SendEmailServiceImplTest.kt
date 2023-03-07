@@ -1,7 +1,7 @@
 package fake.st.emails.service
 
-import fake.st.emails.entity.EmailDetails
-import fake.st.emails.entity.EmailDetailsWithAttachment
+import fake.st.emails.entity.request.EmailDetails
+import fake.st.emails.entity.request.EmailDetailsWithAttachment
 import jakarta.mail.internet.MimeMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -18,7 +18,7 @@ import org.springframework.test.util.ReflectionTestUtils
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class EmailServiceImplTest {
+class SendEmailServiceImplTest {
 
     @Test
     fun `send simple mail - sends email if all settings correct`() {
@@ -27,7 +27,7 @@ class EmailServiceImplTest {
         Mockito.doNothing().`when`(mailSender).send(any(SimpleMailMessage::class.java))
 
         // define email service under test
-        val service = EmailServiceImpl(mailSender)
+        val service = SendEmailServiceImpl(mailSender)
         ReflectionTestUtils.setField(service, "sender", "example@outlook.com")
 
         // send test email
@@ -54,7 +54,7 @@ class EmailServiceImplTest {
         Mockito.`when`(mailSender.createMimeMessage()).thenReturn(JavaMailSenderImpl().createMimeMessage())
 
         // define email service under test
-        val service = EmailServiceImpl(mailSender)
+        val service = SendEmailServiceImpl(mailSender)
         ReflectionTestUtils.setField(service, "sender", "example@outlook.com")
 
         // send test email
