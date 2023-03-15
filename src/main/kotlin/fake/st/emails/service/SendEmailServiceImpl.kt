@@ -2,7 +2,6 @@ package fake.st.emails.service
 
 import fake.st.emails.entity.request.EmailDetails
 import fake.st.emails.entity.request.EmailDetailsWithAttachment
-import fake.st.emails.entity.response.Response
 import jakarta.mail.internet.AddressException
 import jakarta.mail.internet.MimeMessage
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,7 +28,7 @@ class SendEmailServiceImpl(@Autowired val mailSender: JavaMailSender) : SendEmai
     lateinit var sender: String
 
     @Throws(AddressException::class)
-    override fun sendSimpleMail(details: EmailDetails): Response {
+    override fun sendSimpleMail(details: EmailDetails): Boolean {
         val mailMessage = SimpleMailMessage()
 
         mailMessage.from = sender
@@ -39,11 +38,11 @@ class SendEmailServiceImpl(@Autowired val mailSender: JavaMailSender) : SendEmai
 
         mailSender.send(mailMessage)
 
-        return Response("Email sent successfully")
+        return true
     }
 
     @Throws(AddressException::class, IOException::class)
-    override fun sendMailWithAttachment(details: EmailDetailsWithAttachment): Response {
+    override fun sendMailWithAttachment(details: EmailDetailsWithAttachment): Boolean {
 
         val mimeMessage: MimeMessage = mailSender.createMimeMessage()
 
@@ -58,7 +57,7 @@ class SendEmailServiceImpl(@Autowired val mailSender: JavaMailSender) : SendEmai
 
         mailSender.send(mimeMessage)
 
-        return Response("Email sent successfully")
+        return true
     }
 
 

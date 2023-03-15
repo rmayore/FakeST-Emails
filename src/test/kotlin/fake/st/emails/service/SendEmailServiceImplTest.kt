@@ -3,7 +3,6 @@ package fake.st.emails.service
 import fake.st.emails.entity.request.EmailDetails
 import fake.st.emails.entity.request.EmailDetailsWithAttachment
 import jakarta.mail.internet.MimeMessage
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockito.ArgumentMatchers.any
@@ -16,6 +15,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.test.util.ReflectionTestUtils
 import java.util.*
+import org.junit.jupiter.api.Assertions.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SendEmailServiceImplTest {
@@ -42,7 +42,7 @@ class SendEmailServiceImplTest {
         mailMessage.subject = email.subject
 
         Mockito.verify(mailSender, times(1)).send(mailMessage)
-        assertThat(response.message).isEqualTo("Email sent successfully")
+        assertTrue(response)
 
     }
 
@@ -72,7 +72,7 @@ class SendEmailServiceImplTest {
         mimeMessageHelper.addAttachment(file.name, file)
 
         Mockito.verify(mailSender, times(1)).send(mimeMessage)
-        assertThat(response.message).isEqualTo("Email sent successfully")
+        assertTrue(response)
 
     }
 }

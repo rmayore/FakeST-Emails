@@ -1,10 +1,11 @@
 package fake.st.emails.service
 
 
-import org.springframework.validation.annotation.Validated;
-import fake.st.emails.entity.request.EmailDetails;
+import org.springframework.validation.annotation.Validated
+import fake.st.emails.entity.request.EmailDetails
 import fake.st.emails.entity.request.EmailDetailsWithAttachment
-import fake.st.emails.entity.response.Response
+import jakarta.mail.internet.AddressException
+import java.io.IOException
 
 /**
  * Service for email sending operations
@@ -16,8 +17,10 @@ import fake.st.emails.entity.response.Response
 @Validated
 interface SendEmailService {
 
-    fun sendSimpleMail(details: EmailDetails) : Response
- 
-    fun sendMailWithAttachment(details : EmailDetailsWithAttachment) : Response
+    @Throws(AddressException::class)
+    fun sendSimpleMail(details: EmailDetails) : Boolean
+
+    @Throws(AddressException::class, IOException::class)
+    fun sendMailWithAttachment(details : EmailDetailsWithAttachment) : Boolean
 
 }
