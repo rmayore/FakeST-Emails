@@ -4,10 +4,10 @@ spring:
   profiles:
     active: development
   mail:
-    host: smtp-mail.outlook.com
-    port: 587
-    username: rmayore@livinggoods.org
-    password: w9#5rY7aX4TH
+    host: localhost
+    port: 1025
+    username: mayorerobert@gmail.com
+    password:
     properties:
       mail:
         smtp:
@@ -20,4 +20,5 @@ redis:
   port: 6379
   password: mypass
   timeout: 60000
+
 

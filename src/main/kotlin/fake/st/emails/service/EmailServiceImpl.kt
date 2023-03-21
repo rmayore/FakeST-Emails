@@ -6,6 +6,7 @@ import fake.st.emails.entity.redis.Status
 import fake.st.emails.repository.EmailRepository
 import jakarta.mail.internet.AddressException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.mail.MailException
 import org.springframework.stereotype.Service
 import java.io.IOException
 import java.util.Date
@@ -57,6 +58,11 @@ class EmailServiceImpl(
                 email.status = Status.PENDING
                 save(email)
                 false
+            } catch (exception: MailException) {
+                exception.printStackTrace()
+                email.status = Status.PENDING
+                save(email)
+                false
             }
         }
         if (email.emailDetailsWithAttachment != null) {
@@ -66,6 +72,11 @@ class EmailServiceImpl(
                 save(email)
                 true
             } catch (exception: AddressException) {
+                exception.printStackTrace()
+                email.status = Status.PENDING
+                save(email)
+                false
+            } catch (exception: MailException) {
                 exception.printStackTrace()
                 email.status = Status.PENDING
                 save(email)

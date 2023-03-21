@@ -12,7 +12,6 @@ import jakarta.validation.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.mail.MailException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -20,8 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.io.IOException
 import java.util.*
+
 
 /**
  * Rest controller to schedule and send emails
@@ -38,17 +37,26 @@ class EmailController(@Autowired val emailService: EmailService) {
 
     @GetMapping("send")
     @ResponseStatus(HttpStatus.OK)
-    fun sendMail(): Response {
-        val pending = emailService.retrievePending(Priority.LOW)
-        emailService.prepareForSending(pending)
-        pending.forEach { emailService.send(it) }
+    fun scheduleMail(): Response {
+        var pending = emailService.retrievePending(Priority.LOW)
+        pending = emailService.prepareForSending(pending)
+        var success = 0
+        var fails = 0
+        pending.forEach {
+            emailService.send(it).apply {
+                if (this)
+                    success++
+                else
+                    fails++
+            }
+        }
 
-        return Response("Emails sent")
+        return Response("$success successful, $fails failed")
     }
 
     @PostMapping("schedule")
     @ResponseStatus(HttpStatus.OK)
-    fun sendMail(@RequestBody details: EmailDetails): Response {
+    fun scheduleMail(@RequestBody details: EmailDetails): Response {
         val sent = emailService.save(
             Email(
                 id = UUID.randomUUID().toString(),
@@ -66,7 +74,7 @@ class EmailController(@Autowired val emailService: EmailService) {
     }
 
     @PostMapping("schedule-with-attachment")
-    fun sendMailWithAttachment(@RequestBody details: EmailDetailsWithAttachment): Response {
+    fun scheduleMailWithAttachment(@RequestBody details: EmailDetailsWithAttachment): Response {
         val sent = emailService.save(
             Email(
                 id = UUID.randomUUID().toString(),
@@ -81,18 +89,6 @@ class EmailController(@Autowired val emailService: EmailService) {
             Response("Email added to queue successfully")
         else
             Response("Email NOT added to queue")
-    }
-
-    @ExceptionHandler(MailException::class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    fun handleMailExceptions(exception: MailException): ErrorResponse {
-        return ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value().toString(), exception.message ?: "")
-    }
-
-    @ExceptionHandler(IOException::class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    fun handleIOExceptions(exception: IOException): ErrorResponse {
-        return ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value().toString(), exception.message ?: "")
     }
 
     @ExceptionHandler(ConstraintViolationException::class)

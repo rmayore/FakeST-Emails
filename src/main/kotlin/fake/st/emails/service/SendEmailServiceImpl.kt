@@ -7,6 +7,7 @@ import jakarta.mail.internet.MimeMessage
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.ClassPathResource
+import org.springframework.mail.MailException
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -27,7 +28,7 @@ class SendEmailServiceImpl(@Autowired val mailSender: JavaMailSender) : SendEmai
     @Value("\${spring.mail.username}")
     lateinit var sender: String
 
-    @Throws(AddressException::class)
+    @Throws(AddressException::class, MailException::class)
     override fun sendSimpleMail(details: EmailDetails): Boolean {
         val mailMessage = SimpleMailMessage()
 
@@ -41,7 +42,7 @@ class SendEmailServiceImpl(@Autowired val mailSender: JavaMailSender) : SendEmai
         return true
     }
 
-    @Throws(AddressException::class, IOException::class)
+    @Throws(AddressException::class, MailException::class, IOException::class)
     override fun sendMailWithAttachment(details: EmailDetailsWithAttachment): Boolean {
 
         val mimeMessage: MimeMessage = mailSender.createMimeMessage()
