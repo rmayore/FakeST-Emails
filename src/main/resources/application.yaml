@@ -4,15 +4,21 @@ spring:
   profiles:
     active: development
   mail:
-    host: smtp-mail.outlook.com
-    port: 587
-    username: <Username>
-    password: <Password>
+    host: localhost
+    port: 1025
+    username: mayorerobert@gmail.com
+    password:
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+redis:
+  database: 0
+  host: localhost
+  port: 6379
+  password: mypass
+  timeout: 60000
 
 

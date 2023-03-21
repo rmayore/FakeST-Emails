@@ -1,59 +1,93 @@
 package fake.st.emails.service
 
-import fake.st.emails.entity.EmailDetails
-import fake.st.emails.entity.EmailDetailsWithAttachment
-import fake.st.emails.entity.response.Response
+import fake.st.emails.entity.redis.Email
+import fake.st.emails.entity.redis.Priority
+import fake.st.emails.entity.redis.Status
+import fake.st.emails.repository.EmailRepository
 import jakarta.mail.internet.AddressException
-import jakarta.mail.internet.MimeMessage
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.io.ClassPathResource
-import org.springframework.core.io.FileSystemResource
-import org.springframework.mail.SimpleMailMessage
-import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.mail.javamail.MimeMessageHelper
+import org.springframework.mail.MailException
 import org.springframework.stereotype.Service
-import java.io.File
 import java.io.IOException
+import java.util.Date
 
+/**
+ * Implementation for email CRUD operations
+ * using via a redis repository
+ *
+ * @author Robert Mayore.
+ * @version 1.0
+ * @since 26-02-2023.
+ */
 @Service
-class EmailServiceImpl(@Autowired val mailSender: JavaMailSender) : EmailService {
+class EmailServiceImpl(
+    @Autowired val emailRepository: EmailRepository,
+    @Autowired val sendEmailService: SendEmailService
+) : EmailService {
+    override fun save(email: Email): Boolean {
+        email.priority = email.priority ?: Priority.LOW
+        email.status = email.status ?: Status.PENDING
+        email.date = email.date ?: Date()
 
-    @Value("\${spring.mail.username}")
-    lateinit var sender: String
+        emailRepository.save(email)
 
-    @Throws(AddressException::class)
-    override fun sendSimpleMail(details: EmailDetails): Response {
-        val mailMessage = SimpleMailMessage()
-
-        mailMessage.from = sender
-        mailMessage.setTo(details.recipient)
-        mailMessage.text = details.body
-        mailMessage.subject = details.subject
-
-        mailSender.send(mailMessage)
-
-        return Response("Email sent successfully")
+        return true
     }
 
-    @Throws(AddressException::class, IOException::class)
-    override fun sendMailWithAttachment(details: EmailDetailsWithAttachment): Response {
-
-        val mimeMessage: MimeMessage = mailSender.createMimeMessage()
-
-        val mimeMessageHelper = MimeMessageHelper(mimeMessage, true)
-        mimeMessageHelper.setFrom(sender)
-        mimeMessageHelper.setTo(details.recipient)
-        mimeMessageHelper.setText(details.body)
-        mimeMessageHelper.setSubject(details.subject)
-
-        val file = ClassPathResource(details.attachment).file
-        mimeMessageHelper.addAttachment(file.name, file)
-
-        mailSender.send(mimeMessage)
-
-        return Response("Email sent successfully")
+    override fun retrievePending(priority: Priority): MutableList<Email> {
+        return emailRepository.findByStatusAndPriority(Status.PENDING, priority)
     }
 
+    override fun prepareForSending(emails: MutableList<Email>): MutableList<Email> {
+        emails.forEach {
+            it.status = Status.IN_PROGRESS
+            emailRepository.save(it)
+        }
+        return emails
+    }
 
+    override fun send(email: Email): Boolean {
+        if (email.emailDetails != null) {
+            return try {
+                sendEmailService.sendSimpleMail(email.emailDetails)
+                email.status = Status.SENT
+                save(email)
+                true
+            } catch (exception: AddressException) {
+                exception.printStackTrace()
+                email.status = Status.PENDING
+                save(email)
+                false
+            } catch (exception: MailException) {
+                exception.printStackTrace()
+                email.status = Status.PENDING
+                save(email)
+                false
+            }
+        }
+        if (email.emailDetailsWithAttachment != null) {
+            return try {
+                sendEmailService.sendMailWithAttachment(email.emailDetailsWithAttachment)
+                email.status = Status.SENT
+                save(email)
+                true
+            } catch (exception: AddressException) {
+                exception.printStackTrace()
+                email.status = Status.PENDING
+                save(email)
+                false
+            } catch (exception: MailException) {
+                exception.printStackTrace()
+                email.status = Status.PENDING
+                save(email)
+                false
+            } catch (exception: IOException) {
+                exception.printStackTrace()
+                email.status = Status.PENDING
+                save(email)
+                false
+            }
+        }
+        return false
+    }
 }

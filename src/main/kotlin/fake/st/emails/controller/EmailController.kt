@@ -1,7 +1,10 @@
 package fake.st.emails.controller
 
-import fake.st.emails.entity.EmailDetails
-import fake.st.emails.entity.EmailDetailsWithAttachment
+import fake.st.emails.entity.redis.Email
+import fake.st.emails.entity.redis.Priority
+import fake.st.emails.entity.redis.Status
+import fake.st.emails.entity.request.EmailDetails
+import fake.st.emails.entity.request.EmailDetailsWithAttachment
 import fake.st.emails.entity.response.ErrorResponse
 import fake.st.emails.entity.response.Response
 import fake.st.emails.service.EmailService
@@ -9,42 +12,83 @@ import jakarta.validation.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.mail.MailException
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.io.IOException
+import java.util.*
+
+
+/**
+ * Rest controller to schedule and send emails
+ *
+ * @author Robert Mayore.
+ * @version 1.0
+ * @since 07-03-2023.
+ */
 
 
 @RestController
 @RequestMapping(path = ["/email"], produces = [MediaType.APPLICATION_JSON_VALUE])
 class EmailController(@Autowired val emailService: EmailService) {
 
-    @PostMapping("send")
+    @GetMapping("send")
     @ResponseStatus(HttpStatus.OK)
-    fun sendMail(@RequestBody details: EmailDetails): Response {
-        return emailService.sendSimpleMail(details)
+    fun scheduleMail(): Response {
+        var pending = emailService.retrievePending(Priority.LOW)
+        pending = emailService.prepareForSending(pending)
+        var success = 0
+        var fails = 0
+        pending.forEach {
+            emailService.send(it).apply {
+                if (this)
+                    success++
+                else
+                    fails++
+            }
+        }
+
+        return Response("$success successful, $fails failed")
     }
 
-    @PostMapping("send-with-attachment")
-    fun sendMailWithAttachment(@RequestBody details: EmailDetailsWithAttachment): Response {
-        return emailService.sendMailWithAttachment(details)
+    @PostMapping("schedule")
+    @ResponseStatus(HttpStatus.OK)
+    fun scheduleMail(@RequestBody details: EmailDetails): Response {
+        val sent = emailService.save(
+            Email(
+                id = UUID.randomUUID().toString(),
+                emailDetails = details,
+                emailDetailsWithAttachment = null,
+                priority = Priority.LOW,
+                status = Status.PENDING,
+                date = Date()
+            )
+        )
+        return if (sent)
+            Response("Email added to queue successfully")
+        else
+            Response("Email NOT added to queue")
     }
 
-    @ExceptionHandler(MailException::class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    fun handleMailExceptions(exception: MailException): ErrorResponse {
-        return ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value().toString(), exception.message ?: "")
-    }
-
-    @ExceptionHandler(IOException::class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    fun handleIOExceptions(exception: IOException): ErrorResponse {
-        return ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value().toString(), exception.message ?: "")
+    @PostMapping("schedule-with-attachment")
+    fun scheduleMailWithAttachment(@RequestBody details: EmailDetailsWithAttachment): Response {
+        val sent = emailService.save(
+            Email(
+                id = UUID.randomUUID().toString(),
+                emailDetails = null,
+                emailDetailsWithAttachment = details,
+                priority = Priority.LOW,
+                status = Status.PENDING,
+                date = Date()
+            )
+        )
+        return if (sent)
+            Response("Email added to queue successfully")
+        else
+            Response("Email NOT added to queue")
     }
 
     @ExceptionHandler(ConstraintViolationException::class)

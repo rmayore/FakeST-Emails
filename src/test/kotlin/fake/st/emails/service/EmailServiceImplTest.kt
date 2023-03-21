@@ -1,78 +1,173 @@
 package fake.st.emails.service
 
-import fake.st.emails.entity.EmailDetails
-import fake.st.emails.entity.EmailDetailsWithAttachment
-import jakarta.mail.internet.MimeMessage
-import org.assertj.core.api.Assertions.assertThat
+import fake.st.emails.entity.redis.Email
+import fake.st.emails.entity.redis.Priority
+import fake.st.emails.entity.redis.Status
+import fake.st.emails.entity.request.EmailDetails
+import fake.st.emails.entity.request.EmailDetailsWithAttachment
+import fake.st.emails.repository.EmailRepository
+import jakarta.mail.internet.AddressException
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
-import org.mockito.Mockito.times
-import org.springframework.core.io.ClassPathResource
-import org.springframework.mail.SimpleMailMessage
-import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.mail.javamail.JavaMailSenderImpl
-import org.springframework.mail.javamail.MimeMessageHelper
-import org.springframework.test.util.ReflectionTestUtils
+import org.mockito.kotlin.any
 import java.util.*
+
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EmailServiceImplTest {
 
-    @Test
-    fun `send simple mail - sends email if all settings correct`() {
-        // define mock behavior
-        val mailSender = Mockito.mock(JavaMailSender::class.java)
-        Mockito.doNothing().`when`(mailSender).send(any(SimpleMailMessage::class.java))
+    private lateinit var emailRepository: EmailRepository
+    private lateinit var sendEmailService: SendEmailService
+    private lateinit var emailService: EmailServiceImpl
 
-        // define email service under test
-        val service = EmailServiceImpl(mailSender)
-        ReflectionTestUtils.setField(service, "sender", "example@outlook.com")
-
-        // send test email
-        val email = EmailDetails("test@gmail.com", "Subject", "Body")
-        val response = service.sendSimpleMail(email)
-
-        // verify results
-        val mailMessage = SimpleMailMessage()
-        mailMessage.from = "example@outlook.com"
-        mailMessage.setTo(email.recipient)
-        mailMessage.text = email.body
-        mailMessage.subject = email.subject
-
-        Mockito.verify(mailSender, times(1)).send(mailMessage)
-        assertThat(response.message).isEqualTo("Email sent successfully")
-
+    @BeforeEach
+    fun init() {
+        emailRepository = Mockito.mock(EmailRepository::class.java)
+        sendEmailService = Mockito.mock(SendEmailService::class.java)
+        emailService = EmailServiceImpl(emailRepository, sendEmailService)
     }
 
     @Test
-    fun `send mail with attachment - sends email if all settings correct`() {
-        // define mock behavior
-        val mailSender = Mockito.mock(JavaMailSender::class.java)
-        Mockito.doNothing().`when`(mailSender).send(any(MimeMessage::class.java))
-        Mockito.`when`(mailSender.createMimeMessage()).thenReturn(JavaMailSenderImpl().createMimeMessage())
+    fun `save() - saves email`() {
+        Mockito.`when`(emailRepository.save(any())).thenReturn(null)
 
-        // define email service under test
-        val service = EmailServiceImpl(mailSender)
-        ReflectionTestUtils.setField(service, "sender", "example@outlook.com")
+        val email = createEmailSimple()
+        val success = emailService.save(email)
 
-        // send test email
-        val email = EmailDetailsWithAttachment("test@gmail.com", "Subject", "Body", "download.png")
-        val response = service.sendMailWithAttachment(email)
+        val captor: ArgumentCaptor<Email> = ArgumentCaptor.forClass(Email::class.java)
+        Mockito.verify(emailRepository).save(captor.capture())
+        val argument = captor.value
 
-        // verify results
-        val mimeMessage = mailSender.createMimeMessage()
-        val mimeMessageHelper = MimeMessageHelper(mimeMessage, true)
-        mimeMessageHelper.setFrom("example@outlook.com")
-        mimeMessageHelper.setTo(email.recipient)
-        mimeMessageHelper.setText(email.body)
-        mimeMessageHelper.setSubject(email.subject)
-        val file = ClassPathResource(email.attachment).file
-        mimeMessageHelper.addAttachment(file.name, file)
+        assertEquals(email, argument)
+        assertTrue(success)
+    }
 
-        Mockito.verify(mailSender, times(1)).send(mimeMessage)
-        assertThat(response.message).isEqualTo("Email sent successfully")
+    @Test
+    fun `retrievePending() retrieves pending emails`() {
+        val pendingEmails =
+            mutableListOf<Email>().also { for (i in 1..10) it.add(createEmailSimple(status = Status.PENDING)) }
 
+        Mockito.`when`(emailRepository.findByStatusAndPriority(Status.PENDING, Priority.LOW)).thenReturn(pendingEmails)
+
+        val returnedPendingEmails = emailService.retrievePending(Priority.LOW)
+        assertEquals(pendingEmails, returnedPendingEmails)
+    }
+
+    @Test
+    fun `prepareForSending() updates email status to in-progress`() {
+        Mockito.`when`(emailRepository.save(any())).thenReturn(null)
+
+        val pendingEmails =
+            mutableListOf<Email>().also { for (i in 1..10) it.add(createEmailSimple(status = Status.PENDING)) }
+
+        val returnedPendingEmails = emailService.prepareForSending(pendingEmails)
+
+        returnedPendingEmails.forEach { assertEquals(it.status, Status.IN_PROGRESS) }
+    }
+
+    @Test
+    fun `send() - simple email - updates email status to SENT if successful`() {
+        Mockito.`when`(emailRepository.save(any())).thenReturn(null)
+        Mockito.`when`(sendEmailService.sendSimpleMail(any())).thenReturn(true)
+
+        val email = createEmailSimple(status = Status.IN_PROGRESS)
+        val success = emailService.send(email)
+
+        val captor: ArgumentCaptor<Email> = ArgumentCaptor.forClass(Email::class.java)
+        Mockito.verify(emailRepository).save(captor.capture())
+        val argument2 = captor.value
+
+        assertEquals(argument2.status, Status.SENT)
+        assertTrue(success)
+    }
+
+    @Test
+    fun `send() - simple email - updates email status to PENDING if exception thrown`() {
+        Mockito.`when`(emailRepository.save(any())).thenReturn(null)
+        Mockito.`when`(sendEmailService.sendSimpleMail(any())).thenThrow(AddressException())
+
+        val email = createEmailSimple(status = Status.IN_PROGRESS)
+        try {
+            val success = emailService.send(email)
+            assertEquals(success, false)
+        } catch (ex: AddressException) {
+
+            val captor: ArgumentCaptor<Email> = ArgumentCaptor.forClass(Email::class.java)
+            Mockito.verify(emailRepository).save(captor.capture())
+            val argument2 = captor.value
+            assertEquals(argument2.status, Status.PENDING)
+        }
+    }
+
+    @Test
+    fun `send() - with attachment - updates email status to SENT if successful`() {
+        Mockito.`when`(emailRepository.save(any())).thenReturn(null)
+        Mockito.`when`(sendEmailService.sendMailWithAttachment(any())).thenReturn(true)
+
+        val email = createEmailWithAttachment(status = Status.IN_PROGRESS)
+        val success = emailService.send(email)
+
+        val captor: ArgumentCaptor<Email> = ArgumentCaptor.forClass(Email::class.java)
+        Mockito.verify(emailRepository).save(captor.capture())
+        val argument2 = captor.value
+
+        assertEquals(argument2.status, Status.SENT)
+        assertTrue(success)
+    }
+
+    @Test
+    fun `send() - with attachment - updates email status to PENDING if exception thrown`() {
+        Mockito.`when`(emailRepository.save(any())).thenReturn(null)
+        Mockito.`when`(sendEmailService.sendMailWithAttachment(any())).thenThrow(AddressException())
+
+        val email = createEmailWithAttachment(status = Status.IN_PROGRESS)
+        try {
+            val success = emailService.send(email)
+            assertEquals(success, false)
+        } catch (ex: AddressException) {
+
+            val captor: ArgumentCaptor<Email> = ArgumentCaptor.forClass(Email::class.java)
+            Mockito.verify(emailRepository).save(captor.capture())
+            val argument2 = captor.value
+            assertEquals(argument2.status, Status.PENDING)
+        }
+    }
+
+    private fun createEmailSimple(priority: Priority = Priority.LOW, status: Status = Status.PENDING): Email {
+        val details = EmailDetails(
+            "mayorerobert@gmail.com",
+            "Subject",
+            "Body"
+        )
+        return Email(
+            id = UUID.randomUUID().toString(),
+            emailDetails = details,
+            emailDetailsWithAttachment = null,
+            priority = priority,
+            status = status,
+            date = Date()
+        )
+    }
+
+    private fun createEmailWithAttachment(priority: Priority = Priority.LOW, status: Status = Status.PENDING): Email {
+        val details = EmailDetailsWithAttachment(
+            "mayorerobert@gmail.com",
+            "Subject",
+            "Body",
+            "download.png"
+        )
+        return Email(
+            id = UUID.randomUUID().toString(),
+            emailDetails = null,
+            emailDetailsWithAttachment = details,
+            priority = priority,
+            status = status,
+            date = Date()
+        )
     }
 }
