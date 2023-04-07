@@ -1,4 +1,4 @@
-package fake.st.emails.config
+package fake.st.emails.config.redis
 
 import io.lettuce.core.ClientOptions
 import io.lettuce.core.protocol.ProtocolVersion

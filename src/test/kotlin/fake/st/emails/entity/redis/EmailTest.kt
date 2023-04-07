@@ -30,7 +30,5 @@ class EmailTest {
         val json: JsonNode = mapper.readTree(encodedEmail)
 
         assertEquals(json.get("date").asLong(), date.time)
-
-
     }
 }

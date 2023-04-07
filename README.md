@@ -15,3 +15,10 @@ Local mailhog server (SMTP)
 docker run -p 8025:8025 -p 1025:1025  -d mailhog/mailhog
 ```
 
+For single node kafka (kafka + zookeeper), use the [docker-compose file](src/test/resources/kafka-docker-compose.yml) in the test directory, then
+
+```
+docker-compose up -d
+
+```
+
