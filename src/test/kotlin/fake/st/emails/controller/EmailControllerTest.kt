@@ -68,9 +68,10 @@ class EmailControllerTest : WebIntegrationTest() {
     lateinit var sendEmailService: SendEmailService
 
     @BeforeEach
-    fun afterMethod() {
+    fun beforeMethod() {
         redis.execInContainer("redis-cli", "-a", redisPassword, "FLUSHALL")
     }
+
     @Test
     fun `redis test container configured with dynamic properties - should be running`() {
         assertTrue(redis.isRunning)

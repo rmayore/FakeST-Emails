@@ -37,8 +37,13 @@ class EmailController(@Autowired val emailService: EmailService) {
 
     @GetMapping("send")
     @ResponseStatus(HttpStatus.OK)
-    fun scheduleMail(): Response {
-        var pending = emailService.retrievePending(Priority.LOW)
+    fun sendMail(): Response {
+        var pending = mutableListOf<Email>().apply {
+            addAll(emailService.retrievePending(Priority.HIGH))
+            addAll(emailService.retrievePending(Priority.MEDIUM))
+            addAll(emailService.retrievePending(Priority.LOW))
+        }
+
         pending = emailService.prepareForSending(pending)
         var success = 0
         var fails = 0
