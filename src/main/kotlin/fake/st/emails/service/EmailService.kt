@@ -21,6 +21,8 @@ interface EmailService {
 
     fun prepareForSending(emails: MutableList<Email>): MutableList<Email>
 
+    fun prepareForSending(email: Email): Email
+
     fun send(email: Email): Boolean
 
 }

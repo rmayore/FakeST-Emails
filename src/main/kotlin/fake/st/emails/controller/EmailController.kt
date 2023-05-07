@@ -67,7 +67,7 @@ class EmailController(@Autowired val emailService: EmailService) {
                 id = UUID.randomUUID().toString(),
                 emailDetails = details,
                 emailDetailsWithAttachment = null,
-                priority = Priority.LOW,
+                priority = Priority.HIGH,
                 status = Status.PENDING,
                 date = Date()
             )

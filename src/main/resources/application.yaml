@@ -16,6 +16,9 @@ spring:
             enable: true
   kafka:
     bootstrap-servers: localhost:9092
+  batch:
+    jdbc:
+      initialize-schema: always
 redis:
   database: 0
   host: localhost
