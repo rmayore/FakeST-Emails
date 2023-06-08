@@ -3,6 +3,7 @@ package fake.st.emails.config.batch
 import fake.st.emails.entity.batch.EmailBatchResult
 import fake.st.emails.entity.redis.Email
 import fake.st.emails.service.EmailService
+import org.springframework.batch.core.configuration.annotation.StepScope
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component
  */
 
 @Component
+@StepScope
 class EmailItemProcessor : ItemProcessor<Email, EmailBatchResult> {
 
     @Autowired
