@@ -39,11 +39,14 @@ class EmailServiceImpl(
     }
 
     override fun prepareForSending(emails: MutableList<Email>): MutableList<Email> {
-        emails.forEach {
-            it.status = Status.IN_PROGRESS
-            emailRepository.save(it)
-        }
+        emails.forEach { prepareForSending(it)}
         return emails
+    }
+
+    override fun prepareForSending(email: Email): Email {
+        email.status = Status.IN_PROGRESS
+        save(email)
+        return email
     }
 
     override fun send(email: Email): Boolean {
