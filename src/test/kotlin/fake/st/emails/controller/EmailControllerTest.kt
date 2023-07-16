@@ -89,14 +89,14 @@ class EmailControllerTest : WebIntegrationTest() {
                         EmailDetails(
                             "mayorerobert@gmail.com",
                             "Subject",
-                            "Body"
+                            "Body",
                         )
                     )
                 )
         ).andExpect(MockMvcResultMatchers.status().isOk).andExpect(
             MockMvcResultMatchers.jsonPath(
                 "$.message",
-                Matchers.equalTo("Email added to queue successfully")
+                Matchers.equalTo("Email added to queue successfully"),
             )
         )
     }
@@ -121,14 +121,14 @@ class EmailControllerTest : WebIntegrationTest() {
                             "mayorerobert@gmail.com",
                             "Subject",
                             "Body",
-                            "download.png"
+                            "download.png",
                         )
                     )
                 )
         ).andExpect(MockMvcResultMatchers.status().isOk).andExpect(
             MockMvcResultMatchers.jsonPath(
                 "$.message",
-                Matchers.equalTo("Email added to queue successfully")
+                Matchers.equalTo("Email added to queue successfully"),
             )
         )
     }
@@ -161,7 +161,7 @@ class EmailControllerTest : WebIntegrationTest() {
                         EmailDetails(
                             "mayorerobert@gmail.com",
                             "Subject",
-                            "Body"
+                            "Body",
                         )
                     )
                 )
@@ -186,7 +186,7 @@ class EmailControllerTest : WebIntegrationTest() {
                         EmailDetails(
                             "mayorerobert@gmail.com",
                             "Subject",
-                            "Body"
+                            "Body",
                         )
                     )
                 )

@@ -113,7 +113,7 @@ class HighPriorityEmailIntegrationTest {
     fun `high priority email send job executes correctly`(
         @Autowired
         @Qualifier(HighPriorityEmailJobConfiguration.JOB_NAME)
-        highPriorityEmailJob: Job
+        highPriorityEmailJob: Job,
     ) {
         jobLauncherTestUtils.job = highPriorityEmailJob
 
