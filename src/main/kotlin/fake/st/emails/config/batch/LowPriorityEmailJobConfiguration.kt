@@ -18,13 +18,12 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import javax.sql.DataSource
 
-
 /**
  * Batch configuration for sending low priority emails
  *
- * @author  Robert Mayore.
+ * @author Robert Mayore.
  * @version 1.0
- * @since    07-05-2023.
+ * @since 07-05-2023.
  */
 
 @Configuration
@@ -69,5 +68,4 @@ class LowPriorityEmailJobConfiguration : DefaultBatchConfiguration() {
     }
 
     fun reader() = IteratorItemReader(emailRepository.findByStatusAndPriority(Status.PENDING, Priority.LOW))
-
 }

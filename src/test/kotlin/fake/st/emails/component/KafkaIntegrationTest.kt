@@ -27,7 +27,6 @@ import java.io.File
 import java.time.Duration
 import java.util.*
 
-
 @Testcontainers
 @SpringBootTest
 class KafkaIntegrationTest(@Autowired val producer: KafkaProducer) {
@@ -40,7 +39,7 @@ class KafkaIntegrationTest(@Autowired val producer: KafkaProducer) {
         var kafka: DockerComposeContainer<*> =
             DockerComposeContainer(File("src/test/resources/kafka-docker-compose.yml"))
                 .withExposedService("kafka", 9092, Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(30)))
-        //.withLocalCompose(true)
+        // .withLocalCompose(true)
 
         @JvmStatic
         @DynamicPropertySource

@@ -17,7 +17,6 @@ import org.mockito.Mockito
 import org.mockito.kotlin.any
 import java.util.*
 
-
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EmailServiceImplTest {
 
@@ -96,7 +95,6 @@ class EmailServiceImplTest {
             val success = emailService.send(email)
             assertEquals(success, false)
         } catch (ex: AddressException) {
-
             val captor: ArgumentCaptor<Email> = ArgumentCaptor.forClass(Email::class.java)
             Mockito.verify(emailRepository).save(captor.capture())
             val argument2 = captor.value
@@ -130,7 +128,6 @@ class EmailServiceImplTest {
             val success = emailService.send(email)
             assertEquals(success, false)
         } catch (ex: AddressException) {
-
             val captor: ArgumentCaptor<Email> = ArgumentCaptor.forClass(Email::class.java)
             Mockito.verify(emailRepository).save(captor.capture())
             val argument2 = captor.value

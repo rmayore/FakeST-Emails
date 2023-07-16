@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class EmailBatchResult(
     @JsonProperty("emailId") val emailId: String,
-    @JsonProperty("success") val success: Boolean,
+    @JsonProperty("success") val success: Boolean
 )

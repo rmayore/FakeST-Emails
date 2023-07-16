@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component
  * 2. Attempts to send email, updates status to IN_PROGRESS
  * 3. Updates email status to SENT orPENDING
  *
- * @author  Robert Mayore.
+ * @author Robert Mayore.
  * @version 1.0
- * @since   08-04-2023.
+ * @since 08-04-2023.
  */
 
 @Component

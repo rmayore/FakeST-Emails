@@ -11,5 +11,5 @@ import org.springframework.scheduling.annotation.EnableScheduling
 class EmailsApplication
 
 fun main(args: Array<String>) {
-	runApplication<EmailsApplication>(*args)
+    runApplication<EmailsApplication>(*args)
 }

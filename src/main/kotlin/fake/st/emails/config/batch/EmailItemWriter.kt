@@ -6,13 +6,12 @@ import org.springframework.batch.item.Chunk
 import org.springframework.batch.item.ItemWriter
 import org.springframework.stereotype.Component
 
-
 /**
  * Logging ItemWriter
  *
- * @author  Robert Mayore.
+ * @author Robert Mayore.
  * @version 1.0
- * @since   07-05-2023.
+ * @since 07-05-2023.
  */
 @Component
 @StepScope

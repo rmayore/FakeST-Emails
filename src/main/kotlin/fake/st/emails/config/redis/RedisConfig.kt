@@ -45,7 +45,6 @@ class RedisConfig {
                 .build()
         ).build()
 
-
         val standaloneConfig = RedisStandaloneConfiguration()
         standaloneConfig.hostName = host
         standaloneConfig.setPassword(password)

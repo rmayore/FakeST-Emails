@@ -1,6 +1,5 @@
 package fake.st.emails.service
 
-
 import fake.st.emails.entity.redis.Email
 import fake.st.emails.entity.redis.Priority
 import org.springframework.validation.annotation.Validated
@@ -24,5 +23,4 @@ interface EmailService {
     fun prepareForSending(email: Email): Email
 
     fun send(email: Email): Boolean
-
 }
