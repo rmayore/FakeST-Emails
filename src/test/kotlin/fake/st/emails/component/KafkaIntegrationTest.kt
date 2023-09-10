@@ -39,8 +39,7 @@ class KafkaIntegrationTest(@Autowired val producer: KafkaProducer) {
         var kafka: DockerComposeContainer<*> =
             DockerComposeContainer(File("src/test/resources/kafka-docker-compose.yml"))
                 .withExposedService("kafka", 9092, Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60)))
-        // .withLocalCompose(true)
-
+                .withLocalCompose(true)
         @JvmStatic
         @DynamicPropertySource
         fun kafkaProperties(registry: DynamicPropertyRegistry) {

@@ -55,6 +55,7 @@ class HighPriorityEmailIntegrationTest {
                 9092,
                 Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60))
             )
+                .withLocalCompose(true)
 
         @Container
         private val redis = RedisContainer(DockerImageName.parse("redis:5.0.3-alpine")).apply {
