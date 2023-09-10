@@ -53,7 +53,7 @@ class HighPriorityEmailIntegrationTest {
             DockerComposeContainer(File("src/test/resources/kafka-docker-compose.yml")).withExposedService(
                 "kafka",
                 9092,
-                Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(30))
+                Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60))
             )
 
         @Container
