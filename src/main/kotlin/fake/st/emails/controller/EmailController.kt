@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
-
 /**
  * Rest controller to schedule and send emails
  *
@@ -29,7 +28,6 @@ import java.util.*
  * @version 1.0
  * @since 07-03-2023.
  */
-
 
 @RestController
 @RequestMapping(path = ["/email"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -49,10 +47,11 @@ class EmailController(@Autowired val emailService: EmailService) {
         var fails = 0
         pending.forEach {
             emailService.send(it).apply {
-                if (this)
+                if (this) {
                     success++
-                else
+                } else {
                     fails++
+                }
             }
         }
 
@@ -72,10 +71,11 @@ class EmailController(@Autowired val emailService: EmailService) {
                 date = Date()
             )
         )
-        return if (sent)
+        return if (sent) {
             Response("Email added to queue successfully")
-        else
+        } else {
             Response("Email NOT added to queue")
+        }
     }
 
     @PostMapping("schedule-with-attachment")
@@ -90,10 +90,11 @@ class EmailController(@Autowired val emailService: EmailService) {
                 date = Date()
             )
         )
-        return if (sent)
+        return if (sent) {
             Response("Email added to queue successfully")
-        else
+        } else {
             Response("Email NOT added to queue")
+        }
     }
 
     @ExceptionHandler(ConstraintViolationException::class)

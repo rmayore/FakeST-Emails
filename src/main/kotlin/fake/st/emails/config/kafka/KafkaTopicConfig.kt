@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.TopicBuilder
 import org.springframework.kafka.core.KafkaAdmin
 
-
 /**
  * Kafka topic configuration
  *
@@ -18,8 +17,6 @@ import org.springframework.kafka.core.KafkaAdmin
 
 @Configuration
 class KafkaTopicConfig {
-
-
 
     @Value("\${spring.kafka.bootstrap-servers}")
     lateinit var bootstrapAddress: String

@@ -44,7 +44,6 @@ class SendEmailServiceImpl(@Autowired val mailSender: JavaMailSender) : SendEmai
 
     @Throws(AddressException::class, MailException::class, IOException::class)
     override fun sendMailWithAttachment(details: EmailDetailsWithAttachment): Boolean {
-
         val mimeMessage: MimeMessage = mailSender.createMimeMessage()
 
         val mimeMessageHelper = MimeMessageHelper(mimeMessage, true)
@@ -60,6 +59,4 @@ class SendEmailServiceImpl(@Autowired val mailSender: JavaMailSender) : SendEmai
 
         return true
     }
-
-
 }

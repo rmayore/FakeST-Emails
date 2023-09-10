@@ -6,13 +6,12 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import javax.sql.DataSource
 
-
 /**
  * H2 Datasource to store batch metadata
  *
- * @author  Robert Mayore.
+ * @author Robert Mayore.
  * @version 1.0
- * @since   07-05-2023.
+ * @since 07-05-2023.
  */
 
 @Configuration

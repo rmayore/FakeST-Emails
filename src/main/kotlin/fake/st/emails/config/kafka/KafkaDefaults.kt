@@ -3,11 +3,10 @@ package fake.st.emails.config.kafka
 /**
  * Kafka defaults
  *
- * @author  Robert Mayore.
+ * @author Robert Mayore.
  * @version 1.0
- * @since   05-04-2023.
+ * @since 05-04-2023.
  */
-
 
 const val KAFKA_DEFAULT_GROUP: String = "default"
 

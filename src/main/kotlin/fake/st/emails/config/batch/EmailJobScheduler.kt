@@ -8,16 +8,15 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
-
 /**
  * Job Launcher for email jobs. They run on the following schedules:
  * 1. High priority -> Every 10 seconds
  * 2. Medium priority -> Every minute
  * 3. Low priority -> Every 5 minutes
  *
- * @author  Robert Mayore.
+ * @author Robert Mayore.
  * @version 1.0
- * @since   07-05-2023.
+ * @since 07-05-2023.
  */
 @Component
 class EmailJobScheduler {

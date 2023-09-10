@@ -39,7 +39,7 @@ class EmailServiceImpl(
     }
 
     override fun prepareForSending(emails: MutableList<Email>): MutableList<Email> {
-        emails.forEach { prepareForSending(it)}
+        emails.forEach { prepareForSending(it) }
         return emails
     }
 

@@ -14,6 +14,6 @@ import org.springframework.stereotype.Repository
  * @since 26-02-2023.
  */
 @Repository
-interface EmailRepository : CrudRepository<Email, String>{
+interface EmailRepository : CrudRepository<Email, String> {
     fun findByStatusAndPriority(status: Status, priority: Priority): MutableList<Email>
 }

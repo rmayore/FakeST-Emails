@@ -31,20 +31,18 @@ import java.io.File
 import java.time.Duration
 import java.util.*
 
-
 /**
  * End-to-End test for high priority emails.
  *
- * @author  Robert Mayore.
+ * @author Robert Mayore.
  * @version 1.0
- * @since   07-05-2023.
+ * @since 07-05-2023.
  */
 
 @Testcontainers
 @SpringBatchTest
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-
 class HighPriorityEmailIntegrationTest {
     companion object {
 
@@ -55,8 +53,9 @@ class HighPriorityEmailIntegrationTest {
             DockerComposeContainer(File("src/test/resources/kafka-docker-compose.yml")).withExposedService(
                 "kafka",
                 9092,
-                Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(30))
+                Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60))
             )
+                .withLocalCompose(true)
 
         @Container
         private val redis = RedisContainer(DockerImageName.parse("redis:5.0.3-alpine")).apply {
@@ -111,18 +110,20 @@ class HighPriorityEmailIntegrationTest {
         emailService.save(email)
     }
 
-
     @Test
-    fun `high priority email send job executes correctly`(@Autowired @Qualifier(HighPriorityEmailJobConfiguration.JOB_NAME) highPriorityEmailJob: Job) {
-
+    fun `high priority email send job executes correctly`(
+        @Autowired
+        @Qualifier(HighPriorityEmailJobConfiguration.JOB_NAME)
+        highPriorityEmailJob: Job,
+    ) {
         jobLauncherTestUtils.job = highPriorityEmailJob
 
-        //launch job
+        // launch job
         val params = JobParametersBuilder().addString("JobID", System.currentTimeMillis().toString()).toJobParameters()
 
         val jobExecution = jobLauncherTestUtils.launchJob(params)
 
-        //assert job runs to completion
+        // assert job runs to completion
         assertEquals("COMPLETED", jobExecution.exitStatus.exitCode)
     }
 
@@ -130,14 +131,14 @@ class HighPriorityEmailIntegrationTest {
     fun `medium priority email send job executes correctly`() {
         jobLauncherTestUtils.job = mediumPriorityEmailJob
 
-        //save email
+        // save email
         val email = getMockEmail(Priority.MEDIUM)
         emailService.save(email)
 
-        //launch job
+        // launch job
         val jobExecution = jobLauncherTestUtils.launchJob()
 
-        //assert job runs to completion
+        // assert job runs to completion
         assertEquals("COMPLETED", jobExecution.exitStatus.exitCode)
     }
 
@@ -145,16 +146,15 @@ class HighPriorityEmailIntegrationTest {
     fun `low priority email send job executes correctly`() {
         jobLauncherTestUtils.job = lowPriorityEmailJob
 
-        //save email
+        // save email
         val email = getMockEmail(Priority.LOW)
         emailService.save(email)
 
-        //launch job
+        // launch job
         val jobExecution = jobLauncherTestUtils.launchJob()
 
-        //assert job runs to completion
+        // assert job runs to completion
         assertEquals("COMPLETED", jobExecution.exitStatus.exitCode)
-
     }
 
     fun getMockEmail(priority: Priority) = Email(

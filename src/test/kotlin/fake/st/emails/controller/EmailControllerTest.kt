@@ -24,7 +24,6 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 
-
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class EmailControllerTest : WebIntegrationTest() {
@@ -45,7 +44,6 @@ class EmailControllerTest : WebIntegrationTest() {
             withExposedPorts(1025)
         }
 
-
         @JvmStatic
         @DynamicPropertySource
         private fun registerRedisProperties(registry: DynamicPropertyRegistry) {
@@ -58,7 +56,6 @@ class EmailControllerTest : WebIntegrationTest() {
         }
     }
     /* End Test containers setup */
-
 
     private val scheduleEmailEndpoint = "/email/schedule"
     private val scheduleEmailWithAttachmentEndpoint = "/email/schedule-with-attachment"
@@ -90,13 +87,16 @@ class EmailControllerTest : WebIntegrationTest() {
                 .accept(MediaType.APPLICATION_JSON).content(
                     Json.encodeToString(
                         EmailDetails(
-                            "mayorerobert@gmail.com", "Subject", "Body"
+                            "mayorerobert@gmail.com",
+                            "Subject",
+                            "Body",
                         )
                     )
                 )
         ).andExpect(MockMvcResultMatchers.status().isOk).andExpect(
             MockMvcResultMatchers.jsonPath(
-                "$.message", Matchers.equalTo("Email added to queue successfully")
+                "$.message",
+                Matchers.equalTo("Email added to queue successfully"),
             )
         )
     }
@@ -118,13 +118,17 @@ class EmailControllerTest : WebIntegrationTest() {
                 .accept(MediaType.APPLICATION_JSON).content(
                     Json.encodeToString(
                         EmailDetailsWithAttachment(
-                            "mayorerobert@gmail.com", "Subject", "Body", "download.png"
+                            "mayorerobert@gmail.com",
+                            "Subject",
+                            "Body",
+                            "download.png",
                         )
                     )
                 )
         ).andExpect(MockMvcResultMatchers.status().isOk).andExpect(
             MockMvcResultMatchers.jsonPath(
-                "$.message", Matchers.equalTo("Email added to queue successfully")
+                "$.message",
+                Matchers.equalTo("Email added to queue successfully"),
             )
         )
     }
@@ -155,7 +159,9 @@ class EmailControllerTest : WebIntegrationTest() {
                 .accept(MediaType.APPLICATION_JSON).content(
                     Json.encodeToString(
                         EmailDetails(
-                            "mayorerobert@gmail.com", "Subject", "Body"
+                            "mayorerobert@gmail.com",
+                            "Subject",
+                            "Body",
                         )
                     )
                 )
@@ -178,7 +184,9 @@ class EmailControllerTest : WebIntegrationTest() {
                 .accept(MediaType.APPLICATION_JSON).content(
                     Json.encodeToString(
                         EmailDetails(
-                            "mayorerobert@gmail.com", "Subject", "Body"
+                            "mayorerobert@gmail.com",
+                            "Subject",
+                            "Body",
                         )
                     )
                 )
