@@ -55,4 +55,7 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    this.testLogging {
+        this.showStandardStreams = true
+    }
 }
